@@ -3,6 +3,8 @@ https://github.com/aws-samples/amazon-bedrock-samples/blob/main/knowledge-bases/
 '''
 
 import boto3
+import json
+
 import pprint
 from botocore.client import Config
 
@@ -82,9 +84,45 @@ print(output)
 
 
 #Find Start Time
+
+
+def find_start_time(chunk_text, dict):
+    print("finding the start time...")
+
+    output = dict["results"]["items"]
+    for key in output:
+
+        token = key['alternatives'][0]['content']
+
+        start_time =""
+        start_time = key['start_time']
+
+
+        print(token + " "+ start_time)
+
+    f = open("a.json", 'w')
+    json.dump(output,f)
+    f.close()
+    #print(output)
+
+
+
 transcript_file = response['citations'][0]['retrievedReferences'][0]['location']['s3Location']['uri']
+filename = 'AI-Accelerators.json'
+
 print ("\nLocation:\n")
-print(transcript_file)
+f = open(filename)
+dict  = json.load(f)
+f.close()
+print(dict)
+
+find_start_time(chunk_text,dict)
+
+
+
+
+
+
 
 
 
