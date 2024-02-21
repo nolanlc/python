@@ -59,8 +59,8 @@ def retrieveAndGenerate(input, kbId, sessionId=None, model_id = "anthropic.claud
 print ("Hello KB!")
 
 
-query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
-#query = "Why did AWS acquire Annupura Labs?"
+#query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
+query = "Why did AWS acquire Annupura Labs?"
 #query = "What is the title of the AWS reThink episode where Todd Pond tells us how long he has been working in tech?"
 
 print ("Query: "+ query + "\n")
@@ -79,8 +79,12 @@ print ("\n")
 
 chunk_text = response['citations'][0]['retrievedReferences'][0]['content']['text']
 
-output = "\n" + chunk_text
-print(output)
+f = open("chunk_text.txt", "w")
+f.write(chunk_text)
+f.close()
+
+#output = "\n" + chunk_text
+#print(output)
 
 
 #Find Start Time
@@ -88,19 +92,23 @@ print(output)
 
 def find_start_time(chunk_text, dict):
     print("finding the start time...")
+    start_time ="0:00"
 
-    output = dict["results"]["items"]
-    for key in output:
+    items = dict["results"]["items"]
+
+    for key in items:
 
         token = key['alternatives'][0]['content']
+        #print(token)
 
-        start_time =""
-        start_time = key['start_time']
+        if 'start_time' in key.keys():   #punctuations don't have start_time
+            start_time = key['start_time']
 
+        #print(start_time)
 
-        print(token + " "+ start_time)
-
-    f = open("a.json", 'w')
+    f = open("start_times.json", 'w')
+    output = items
+    #output = items['alternatives'][0]['content']
     json.dump(output,f)
     f.close()
     #print(output)
@@ -110,14 +118,41 @@ def find_start_time(chunk_text, dict):
 transcript_file = response['citations'][0]['retrievedReferences'][0]['location']['s3Location']['uri']
 filename = 'AI-Accelerators.json'
 
-print ("\nLocation:\n")
+
+
+#print ("\nLocation:\n")
 f = open(filename)
 dict  = json.load(f)
 f.close()
-print(dict)
 
-find_start_time(chunk_text,dict)
 
+transcript_text = dict['results']['transcripts'][0]['transcript']
+f = open("transcript_text.txt", "w")
+f.write(transcript_text)
+f.close()
+
+
+print("find text:")
+pos = transcript_text.find(chunk_text)
+print(pos)
+
+#print(transcript_text[8])
+#print(len(transcript_text))
+
+#print(dict)
+#find_start_time(chunk_text,dict)
+
+
+#Build Array of Start Time for Each Character Position
+
+transcript_length = len(transcript_text)
+print(transcript_length)
+start_times = []
+start_time = "0.00"
+for i in range(transcript_length):
+    
+    start_times.append(start_time)
+    print(str(i) + ": " + start_times[i])
 
 
 
