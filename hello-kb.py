@@ -4,6 +4,7 @@ https://github.com/aws-samples/amazon-bedrock-samples/blob/main/knowledge-bases/
 
 import boto3
 import json
+import numpy as np
 
 import pprint
 from botocore.client import Config
@@ -67,8 +68,8 @@ print ("Query: "+ query + "\n")
 
 
 response = retrieveAndGenerate(query, kb_id,model_id=model_id,region_id=region_id)
-print("Reponse:")
-print(response)
+#print("Reponse:")
+#print(response)
 
 print("\n")
 generated_text = response['output']['text']
@@ -132,9 +133,10 @@ f.write(transcript_text)
 f.close()
 
 
-print("find text:")
+print("find start time for chunk:")
+print(chunk_text)
 pos = transcript_text.find(chunk_text)
-print(pos)
+#print(pos)
 
 #print(transcript_text[8])
 #print(len(transcript_text))
@@ -143,19 +145,71 @@ print(pos)
 #find_start_time(chunk_text,dict)
 
 
-#Build Array of Start Time for Each Character Position
+#Initialize Array of Start Time for Each Character Position
 
 transcript_length = len(transcript_text)
-print(transcript_length)
 start_times = []
 start_time = "0.00"
 for i in range(transcript_length):
     
     start_times.append(start_time)
-    print(str(i) + ": " + start_times[i])
+    #print(str(i) + ": " + start_times[i])
+
+start_times_np = np.array(start_times)
+#print(start_times_np)
 
 
 
+character_count = 0
+items = dict["results"]["items"]
+for key in items:
+
+    token = key['alternatives'][0]['content']
+    type = key['type']
+
+  
+
+    token_length = len(token)
+
+    if (type == 'pronunciation'):       
+        start_time = key['start_time']
+        #print("character_count: " + str(character_count))
+        start_times_np[character_count] = start_time
+        #start_times = np.assign(start_times, character_count, start_time)
+        #print("setting start time! "+ str(character_count)+ " " + start_times[character_count])
+    
+    if (character_count < 200):
+        print(type + " " + str(character_count)+ ": " +token  + " "+ start_time)    
+
+    if ((character_count + token_length + 1) <= transcript_length):
+        character_count = character_count + token_length + 1
+
+    if (type=='punctuation'):
+        character_count = character_count - 1   
+
+
+
+for i in range(20):
+    print(str(i) + ": " + start_times_np[i])
+
+
+#print("setting start time! "+ str(character_count)+ " " + start_times[character_count])  
+
+
+
+
+
+#print(start_times)
+#chunk_start_time = start_times[pos]
+
+#print("chunk start time: " + chunk_start_time)
+
+f = open("start_times.json", 'w')
+output = items
+#output = items['alternatives'][0]['content']
+json.dump(output,f)
+f.close()
+#print(output)
 
 
 
