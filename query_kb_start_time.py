@@ -47,10 +47,11 @@ def retrieveAndGenerate(input, kbId, sessionId=None, model_id = "anthropic.claud
 
 
 
-query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
+#query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
 #query = "What is the title of the AWS reThink episode where Todd Pond tells us how long he has been working in tech?"
 #query = "Why did AWS acquire Annupura Labs?"
 #query = 'What does it take to be successful in deploying technology in 2024 according to Todd Pond of AWS?'
+query = "Please recommend an AWS reThink podcast episode that can help me get ready for Gen AI"
 
 model_id = 'anthropic.claude-v2'
 region_id = "us-west-2" # replace it with the region you're running sagemaker notebook
@@ -129,15 +130,15 @@ print("TagSet:")
 print(response['TagSet'])
 
 TagSet = response['TagSet']
-Title = "Podcast Title"
-Title = TagSet[0]["Value"]
+title = "Podcast Title"
+
 
 for Tag in TagSet:
     if (Tag["Key"]=="title"):
-        Title = Tag["Value"]
+        title = Tag["Value"]
 
 
-print("Title: " + Title)
+print("Title: " + title)
 
 
 
@@ -225,6 +226,6 @@ print('Time in hh:mm:ss:', td)
 # Use the below code if you want it in a string
 start_time_hh_mm_ss = str(timedelta(seconds=sec))
 print(start_time_hh_mm_ss)
-
+print ("From episode: "+ title)
 
 
