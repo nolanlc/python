@@ -50,6 +50,7 @@ def retrieveAndGenerate(input, kbId, sessionId=None, model_id = "anthropic.claud
 query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
 #query = "What is the title of the AWS reThink episode where Todd Pond tells us how long he has been working in tech?"
 #query = "Why did AWS acquire Annupura Labs?"
+#query = 'What does it take to be successful in deploying technology in 2024 according to Todd Pond of AWS?'
 
 model_id = 'anthropic.claude-v2'
 region_id = "us-west-2" # replace it with the region you're running sagemaker notebook
@@ -89,14 +90,15 @@ bucket = o.netloc
 obj_name = o.path
 key = obj_name[1:] #strip first character '/'
 
-#print("bucket: "+bucket)
-#print("obj_name: "+ obj_name)
+print("bucket: "+bucket)
+print("obj_name: "+ obj_name)
 
 # Get the object from S3
 #bucket = "rethinkpodcast"
 #filename = "text/transcripts/what-it-takes-to-win.json"
 
 #obj_name = "text/transcripts/what-it-takes-to-win.json"
+print("key= "+key)
 obj = s3.get_object(Bucket=bucket, Key=key)
 
 # Load the JSON data into a Python dictionary
@@ -105,6 +107,39 @@ dict = json.loads(obj['Body'].read().decode('utf-8'))
 f = open("dict.json", 'w')
 json.dump(dict,f)
 f.close()
+
+
+
+#get episode title
+
+# Create an S3 client
+#s3 = boto3.client('s3')
+
+print("bucket: "+bucket)
+print("key: "+ key)
+
+# Get the object tags
+response = s3.get_object_tagging(
+    Bucket=bucket,
+    Key=key
+)
+
+# Print the tags
+print("TagSet:")
+print(response['TagSet'])
+
+TagSet = response['TagSet']
+Title = "Podcast Title"
+Title = TagSet[0]["Value"]
+
+for Tag in TagSet:
+    if (Tag["Key"]=="title"):
+        Title = Tag["Value"]
+
+
+print("Title: " + Title)
+
+
 
 
 #Load the transcription into a string
@@ -190,3 +225,6 @@ print('Time in hh:mm:ss:', td)
 # Use the below code if you want it in a string
 start_time_hh_mm_ss = str(timedelta(seconds=sec))
 print(start_time_hh_mm_ss)
+
+
+
