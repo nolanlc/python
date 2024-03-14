@@ -1,3 +1,20 @@
+###########################################################################
+#
+# catalog_query_transcribe_transcripts_sample.py
+#
+# This Python script:
+# -Uses Amazon Bedrock Knowledge Base to send a query to Claude Anthropic v2.1 LLM
+# -The Knowledge Base is synced with an S3 bucket containing transcriptions of podcast episodes in JSON format
+# -The episodes were transcribed by Amazon Transcribe
+# -Upon receiving the query, this script will call Knowledge Base API which will orchestrate RAG workflow
+# -The script will then lookup the S3 URI location for the first releveant chunk returned by KB.
+# -It will use the S3 URI location to lookup the associated podcast episode title.
+# -It will then use the trasncribe JSON object to return the start time of the relevant chunk.
+#
+################################################################
+
+
+
 import boto3
 import json
 import numpy as np
@@ -11,7 +28,7 @@ bedrock_client = boto3.client('bedrock-runtime')
 bedrock_agent_client = boto3.client("bedrock-agent-runtime",
                               config=bedrock_config)
 
-#Submit Query to KB
+#Submit Query to Amazon Bedrock Knowlege Base
 def retrieveAndGenerate(input, kbId, sessionId=None, model_id = "anthropic.claude-instant-v1", region_id = "us-east-1"):
 
     model_arn = f'arn:aws:bedrock:{region_id}::foundation-model/{model_id}'
@@ -43,11 +60,14 @@ def retrieveAndGenerate(input, kbId, sessionId=None, model_id = "anthropic.claud
             }
         )
 
+
+
 #query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
 #query = "What is the title of the AWS reThink episode where Todd Pond tells us how long he has been working in tech?"
-query = "Why did AWS acquire Annupura Labs?"
-#query = 'What does it take to be successful in deploying technology in 2024 according to Todd Pond of AWS?'
+query = 'What advice does Todd Pond of AWS offer to young people for being successful in tech today?'
 #query = "Please recommend an AWS reThink podcast episode that can help me get ready for Gen AI"
+    
+#query = "Why did AWS acquire Annupura Labs?"
 
 model_id = 'anthropic.claude-v2'
 region_id = "us-west-2" # replace it with the region you're running sagemaker notebook
@@ -67,12 +87,15 @@ print(generated_text)
 print ("\n")
 
 
-#Use the first retrieved reference chunk
+#Use the first retrieved reference chunk to look up episode title
 #Extract the text from the first chunk returned
-chunk_text = response['citations'][0]['retrievedReferences'][0]['content']['text']
+retrievedReferences = response['citations'][0]['retrievedReferences']
+chunk_text = retrievedReferences[0]['content']['text']
 
 f = open("chunk_text.txt", "w")
-f.write(chunk_text)
+for chunk in retrievedReferences:
+    f.write(chunk['content']['text'])
+    f.write('\n')
 f.close()
 
 
@@ -90,11 +113,6 @@ key = obj_name[1:] #strip first character '/'
 print("bucket: "+bucket)
 print("obj_name: "+ obj_name)
 
-# Get the object from S3
-#bucket = "rethinkpodcast"
-#filename = "text/transcripts/what-it-takes-to-win.json"
-
-#obj_name = "text/transcripts/what-it-takes-to-win.json"
 print("key= "+key)
 obj = s3.get_object(Bucket=bucket, Key=key)
 
@@ -109,9 +127,6 @@ f.close()
 ######################
 # get episode title
 #######################
-
-# Create an S3 client
-#s3 = boto3.client('s3')
 
 print("bucket: "+bucket)
 print("key: "+ key)
@@ -136,9 +151,6 @@ for Tag in TagSet:
 
 
 print("Title: " + title)
-
-
-
 
 #Load the transcription into a string
 transcript_text = dict['results']['transcripts'][0]['transcript']
@@ -188,11 +200,15 @@ for key in items:
 print("find start time for chunk:")
 print(chunk_text)
 pos = transcript_text.find(chunk_text)
-print("pos: " + str(pos))
+#print("pos: " + str(pos))
 
 #Return start time for the chunk
-start_time = start_times_np[pos]
-print("setting start time! "+ str(pos)+ " " + start_time)  
+#Default to start time of "0.00" if chunk is not found in the transcript
+if pos > 0:
+    start_time = start_times_np[pos]
+else:    
+    start_time = "0.00"
+#print("setting start time! "+ str(pos)+ " " + start_time)  
 
 #print(start_times)
 #chunk_start_time = start_times[pos]
