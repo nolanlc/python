@@ -102,6 +102,7 @@ f.close()
 #Load contents of Transcribe transcription S3 object into a Python dictionary
 s3_uri = response['citations'][0]['retrievedReferences'][0]['location']['s3Location']['uri']
 print("s3_uri: "+ s3_uri)
+print("\n")
 
 
 s3 = boto3.client('s3')
@@ -109,11 +110,6 @@ o = urlparse(s3_uri)
 bucket = o.netloc
 obj_name = o.path
 key = obj_name[1:] #strip first character '/'
-
-print("bucket: "+bucket)
-print("obj_name: "+ obj_name)
-
-print("key= "+key)
 obj = s3.get_object(Bucket=bucket, Key=key)
 
 # Load the JSON data into a Python dictionary
@@ -128,9 +124,6 @@ f.close()
 # get episode title
 #######################
 
-print("bucket: "+bucket)
-print("key: "+ key)
-
 # Get the object tags
 response = s3.get_object_tagging(
     Bucket=bucket,
@@ -138,9 +131,6 @@ response = s3.get_object_tagging(
 )
 
 # Print the tags
-print("TagSet:")
-print(response['TagSet'])
-
 TagSet = response['TagSet']
 title = "Podcast Title"
 
@@ -148,9 +138,6 @@ title = "Podcast Title"
 for Tag in TagSet:
     if (Tag["Key"]=="title"):
         title = Tag["Value"]
-
-
-print("Title: " + title)
 
 #Load the transcription into a string
 transcript_text = dict['results']['transcripts'][0]['transcript']
@@ -200,7 +187,6 @@ for key in items:
 print("find start time for chunk:")
 print(chunk_text)
 pos = transcript_text.find(chunk_text)
-#print("pos: " + str(pos))
 
 #Return start time for the chunk
 #Default to start time of "0.00" if chunk is not found in the transcript
@@ -208,35 +194,29 @@ if pos > 0:
     start_time = start_times_np[pos]
 else:    
     start_time = "0.00"
-#print("setting start time! "+ str(pos)+ " " + start_time)  
 
-#print(start_times)
-#chunk_start_time = start_times[pos]
-
-#print("chunk start time: " + chunk_start_time)
 
 f = open("start_times.json", 'w')
 output = items
-#output = items['alternatives'][0]['content']
 json.dump(output,f)
 f.close()
-#print(output)
 
 
 
-
-
+###########################################
+# Print final output of Start Time and Episode Title
+###########################################
 from datetime import timedelta
 
 sec = float(start_time)
-print('Time in Seconds:', sec)
+print("\n")
+print('Start Time in Seconds:', sec)
 
 td = timedelta(seconds=sec)
-print('Time in hh:mm:ss:', td)
+print('Start Time in hh:mm:ss:', td)
 
 # Use the below code if you want it in a string
 start_time_hh_mm_ss = str(timedelta(seconds=sec))
-print(start_time_hh_mm_ss)
 print ("From episode: "+ title)
 
 
