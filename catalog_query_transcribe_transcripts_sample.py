@@ -64,10 +64,10 @@ def retrieveAndGenerate(input, kbId, sessionId=None, model_id = "anthropic.claud
 
 #query = "How long has Todd Pond, AWS Director of Strategic Sales, been working in the tech industry?"
 #query = "What is the title of the AWS reThink episode where Todd Pond tells us how long he has been working in tech?"
-query = 'What advice does Todd Pond of AWS offer to young people for being successful in tech today?'
+#query = 'What advice does Todd Pond of AWS offer to young people for being successful in tech today?'
 #query = "Please recommend an AWS reThink podcast episode that can help me get ready for Gen AI"
     
-#query = "Why did AWS acquire Annupura Labs?"
+query = "Why did AWS acquire Annupura Labs?"
 
 model_id = 'anthropic.claude-v2'
 region_id = "us-west-2" # replace it with the region you're running sagemaker notebook
