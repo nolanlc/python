@@ -192,6 +192,8 @@ pos = transcript_text.find(chunk_text)
 #Default to start time of "0.00" if chunk is not found in the transcript
 if pos > 0:
     start_time = start_times_np[pos]
+    print("\n")
+    print("character start position:" + str(pos))
 else:    
     start_time = "0.00"
 
@@ -209,7 +211,6 @@ f.close()
 from datetime import timedelta
 
 sec = float(start_time)
-print("\n")
 print('Start Time in Seconds:', sec)
 
 td = timedelta(seconds=sec)
