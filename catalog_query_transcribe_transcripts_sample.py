@@ -159,7 +159,7 @@ start_times_np = np.array(start_times)
 # items[] is an array of dicionaries.  Each dictionary containes start_time for each token
 # Loop through each token and get the start time of the token
 # Set the start time for the first character of each token
-# This will create an array called 'start_teims_np[]' which gives the start time of each character position
+# This will create an array called 'start_times_np[]' which gives the start time of each character position
 character_count = 0
 items = dict["results"]["items"]
 for key in items:
